@@ -102,35 +102,19 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Auth routes - accessible without authentication */}
+        {/* Always show login for unauthenticated users */}
         <Route
           path="/login"
-          element={!user ? <Login setUser={setUser} /> : <Navigate to={userBusinessInfo ? "/welcome" : "/business-form"} />}
-        />
-
-        {/* Protected routes - require authentication */}
-        <Route
-          path="/business-form"
           element={
-            user ? (
-              userBusinessInfo ? <Navigate to="/welcome" /> : <BusinessForm />
+            !user ? (
+              <Login />
             ) : (
-              <NotAuthenticated />
+              <Navigate to="/" replace />
             )
           }
         />
 
-        <Route
-          path="/welcome"
-          element={
-            user ? (
-              userBusinessInfo ? <Welcome /> : <Navigate to="/business-form" />
-            ) : (
-              <NotAuthenticated />
-            )
-          }
-        />
-
+        {/* Protect all other routes */}
         <Route
           path="/"
           element={
@@ -141,10 +125,32 @@ function App() {
                   <Home />
                 </>
               ) : (
-                <Navigate to="/business-form" />
+                <Navigate to="/business-form" replace />
               )
             ) : (
-              <NotAuthenticated />
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/business-form"
+          element={
+            user ? (
+              userBusinessInfo ? <Navigate to="/welcome" /> : <BusinessForm />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/welcome"
+          element={
+            user ? (
+              userBusinessInfo ? <Welcome /> : <Navigate to="/business-form" />
+            ) : (
+              <Navigate to="/login" replace />
             )
           }
         />
@@ -159,10 +165,10 @@ function App() {
                   <Profile />
                 </>
               ) : (
-                <Navigate to="/business-form" />
+                <Navigate to="/business-form" replace />
               )
             ) : (
-              <NotAuthenticated />
+              <Navigate to="/login" replace />
             )
           }
         />
@@ -177,10 +183,10 @@ function App() {
                   <Chatbot />
                 </>
               ) : (
-                <Navigate to="/business-form" />
+                <Navigate to="/business-form" replace />
               )
             ) : (
-              <NotAuthenticated />
+              <Navigate to="/login" replace />
             )
           }
         />
@@ -196,10 +202,10 @@ function App() {
                   <About />
                 </>
               ) : (
-                <Navigate to="/business-form" />
+                <Navigate to="/business-form" replace />
               )
             ) : (
-              <NotAuthenticated />
+              <Navigate to="/login" replace />
             )
           }
         />
@@ -214,16 +220,16 @@ function App() {
                   <ChatHistory />
                 </>
               ) : (
-                <Navigate to="/business-form" />
+                <Navigate to="/business-form" replace />
               )
             ) : (
-              <NotAuthenticated />
+              <Navigate to="/login" replace />
             )
           }
         />
 
         {/* Catch all other routes and redirect to NotAuthenticated if not logged in */}
-        <Route path="*" element={user ? <Navigate to="/" /> : <NotAuthenticated />} />
+        <Route path="*" element={user ? <Navigate to="/" /> : <Navigate to="/login" replace />} />
       </Routes>
     </Router>
   )

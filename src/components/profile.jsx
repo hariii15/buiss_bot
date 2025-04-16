@@ -81,9 +81,10 @@ const Profile = () => {
       setProfileData(editedData); // Update local profile data state
       setIsEditing(false); // Exit edit mode
       setSaveMessage('Profile updated successfully!');
-      // Clear message after a few seconds
-      setTimeout(() => setSaveMessage(''), 3000);
-
+      // Force reload to update business info in App.jsx and redirect correctly
+      setTimeout(() => {
+        window.location.reload();
+      }, 800);
     } catch (err) {
       console.error('Error updating profile:', err);
       setError(err.message || 'Failed to update profile.');
