@@ -200,43 +200,33 @@ const chatbot = () => {
   }
 
   return (
-    // Main container - takes full height below navbar, dark background
     <div className="flex flex-col h-[calc(100vh-64px)] bg-gray-800 text-gray-100">
-
-      {/* Chat messages area - scrolls */}
       <div className="flex-1 overflow-y-auto">
-        {/* Add loading indicator for history */}
         {historyLoading ? (
           <div className="flex justify-center items-center h-full">
             <div className="text-gray-400">Loading chat history...</div>
           </div>
         ) : (
-          <div className="max-w-3xl mx-auto px-4 py-10 space-y-8"> {/* Centered content, more vertical space */}
+          <div className="max-w-3xl mx-auto px-2 sm:px-4 py-6 sm:py-10 space-y-6 sm:space-y-8">
             {messages.map((message, index) => (
               <div
                 key={index}
-                // Use flex row for avatar and text block
-                className={`flex items-start space-x-4 ${
+                className={`flex items-start space-x-2 sm:space-x-4 ${
                   message.sender === 'user' ? 'justify-end' : 'justify-start'
                 }`}
               >
-                {/* Bot Avatar */}
                 {message.sender === 'bot' && (
                   <div className="flex-shrink-0 w-8 h-8 rounded-md bg-indigo-600 flex items-center justify-center shadow">
                     <FiCpu className="text-white h-5 w-5" />
                   </div>
                 )}
-
-                {/* Message Text Block */}
                 <div
-                  // Subtle background for bot, no background for user
-                  className={`p-4 rounded-lg max-w-[80%] min-w-0 break-words shadow ${
+                  className={`p-3 sm:p-4 rounded-lg max-w-[90vw] sm:max-w-[80%] min-w-0 break-words shadow ${
                     message.sender === 'user'
-                      ? 'bg-blue-600 text-white' // User message background
-                      : 'bg-gray-700' // Bot message background
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-700'
                   }`}
                 >
-                  {/* Render newlines correctly */}
                   {message.text.split('\n').map((line, i, arr) => (
                     <span key={i}>
                       {line}
@@ -244,8 +234,6 @@ const chatbot = () => {
                     </span>
                   ))}
                 </div>
-
-                {/* User Avatar */}
                 {message.sender === 'user' && (
                   <div className="flex-shrink-0 w-8 h-8 rounded-md bg-gray-600 flex items-center justify-center shadow">
                     <FiUser className="text-white h-5 w-5" />
@@ -253,15 +241,13 @@ const chatbot = () => {
                 )}
               </div>
             ))}
-
-            {/* Typing Indicator - styled similarly to bot message */}
             {isLoading && messages.length > 0 && messages[messages.length - 1]?.sender === 'user' && (
-              <div className="flex items-start space-x-4 justify-start">
+              <div className="flex items-start space-x-2 sm:space-x-4 justify-start">
                 <div className="flex-shrink-0 w-8 h-8 rounded-md bg-indigo-600 flex items-center justify-center shadow">
                   <FiCpu className="text-white h-5 w-5" />
                 </div>
-                <div className="p-4 rounded-lg bg-gray-700 shadow">
-                  <div className="flex space-x-1.5"> {/* Increased space */}
+                <div className="p-3 sm:p-4 rounded-lg bg-gray-700 shadow">
+                  <div className="flex space-x-1.5">
                     <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-75"></span>
                     <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-150"></span>
                     <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-300"></span>
@@ -269,37 +255,32 @@ const chatbot = () => {
                 </div>
               </div>
             )}
-            {/* Scroll anchor */}
             <div ref={messagesEndRef} />
           </div>
         )}
       </div>
-
-      {/* Input area - Pinned to bottom */}
-      <footer className="bg-gray-800 border-t border-gray-700 p-4">
-        <div className="max-w-3xl mx-auto"> {/* Centered input */}
+      <footer className="bg-gray-800 border-t border-gray-700 p-2 sm:p-4">
+        <div className="max-w-3xl mx-auto">
           <div className="flex items-center bg-gray-700 rounded-lg shadow-inner overflow-hidden">
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && !isLoading && handleSendMessage()}
-              className="flex-1 p-4 bg-transparent text-gray-100 placeholder-gray-400 focus:outline-none resize-none" // Added resize-none
+              className="flex-1 p-3 sm:p-4 bg-transparent text-gray-100 placeholder-gray-400 focus:outline-none resize-none text-base"
               placeholder="Send a message..."
-              disabled={isLoading || historyLoading} // Disable input while history loads
-              rows={1} // Start with single line, can expand if needed (requires more complex handling)
+              disabled={isLoading || historyLoading}
+              rows={1}
             />
             <button
               onClick={handleSendMessage}
-              disabled={isLoading || historyLoading || !input.trim()} // Disable button while history loads
-              // Consistent padding, subtle hover effect
-              className={`p-4 ${
+              disabled={isLoading || historyLoading || !input.trim()}
+              className={`p-3 sm:p-4 ${
                 isLoading || historyLoading || !input.trim()
                   ? 'text-gray-500 cursor-not-allowed'
                   : 'text-gray-400 hover:text-gray-200'
               } transition duration-200`}
             >
-              {/* Use Send icon, replace with spinner when loading */}
               {isLoading ? (
                  <svg className="animate-spin h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
