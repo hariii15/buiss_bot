@@ -35,8 +35,8 @@ const BusinessForm = () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('No authenticated user found')
 
-      // Insert user data including their ID from auth
-      const { error } = await supabase.from('users').insert({
+      // Use upsert instead of insert to avoid duplicate key error
+      const { error } = await supabase.from('users').upsert({
         id: user.id,
         email: user.email,
         business_name: formData.business_name,
