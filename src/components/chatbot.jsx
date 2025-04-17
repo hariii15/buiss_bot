@@ -51,16 +51,14 @@ const chatbot = () => {
           // Fetch chat history (parallel fetch)
           const historyPromise = supabase
             .from('chat_history')
-            .select('sender, message_text') // Select only needed fields
+            .select('sender, message_text')
             .eq('user_id', user.id)
-            .order('created_at', { ascending: true }); // Order by time
+            .order('created_at', { ascending: true });
 
-          // Wait for both fetches
           const [contextResult, historyResult] = await Promise.all([contextPromise, historyPromise]);
 
           // Process business context
           if (contextResult.data && !contextResult.error) {
-            console.log("Business Context Loaded:", contextResult.data);
             setBusinessContext(contextResult.data);
           } else if (contextResult.error && contextResult.error.code !== 'PGRST116') {
             console.error("Error fetching business context:", contextResult.error);
@@ -68,34 +66,29 @@ const chatbot = () => {
 
           // Process chat history
           if (historyResult.data && !historyResult.error) {
-            // Map fetched data to the message format used by the component
             const formattedHistory = historyResult.data.map(msg => ({
               sender: msg.sender,
               text: msg.message_text
             }));
             setMessages(formattedHistory);
-            console.log("Chat History Loaded:", formattedHistory.length, "messages");
           } else if (historyResult.error) {
-            console.error("Error fetching chat history:", historyResult.error);
-            setMessages([]); // Ensure messages is an empty array on error
+            setMessages([]);
           } else {
-             setMessages([]); // Ensure messages is an empty array if no history
+             setMessages([]);
           }
 
         } else {
-          console.error('No authenticated user found');
-          setMessages([]); // Clear messages if no user
+          setMessages([]);
         }
       } catch (err) {
-        console.error("Initialization error:", err);
-        setMessages([]); // Clear messages on error
+        setMessages([]);
       } finally {
-        setHistoryLoading(false); // Finish loading history
+        setHistoryLoading(false);
       }
     };
 
     initializeChat();
-  }, []); // Run only once on mount
+  }, []);
 
   // Function to save a message to the database
   const saveMessageToDb = async (sender, text) => {
@@ -117,21 +110,19 @@ const chatbot = () => {
   };
 
   const handleSendMessage = async () => {
-    if (!input.trim() || isLoading) return // Prevent sending empty messages or multiple requests
+    if (!input.trim() || isLoading) return
 
-    const userMessageText = input; // Store user input text
+    const userMessageText = input;
     const userMessage = { sender: 'user', text: userMessageText }
     setMessages((prev) => [...prev, userMessage])
     setInput('')
     setIsLoading(true)
 
-    // Save user message optimistically (can be moved after API call if preferred)
     await saveMessageToDb('user', userMessageText);
 
     try {
       const currentUserId = userId || 'anonymous'
 
-      // Format the business context into a string for the prompt
       let contextString = "User's Business Context:\n";
       if (businessContext) {
         contextString += `- Business Name: ${businessContext.business_name || 'N/A'}\n`;
@@ -145,16 +136,14 @@ const chatbot = () => {
         contextString += "No business context available.\n";
       }
 
-      // Combine the context with the user's actual prompt
-      const fullPrompt = `${contextString}\nUser Query: ${userMessageText}`; // Use stored text
-      console.log("Sending to API:", { user_id: currentUserId, prompt: fullPrompt }); // Debug log
+      const fullPrompt = `${contextString}\nUser Query: ${userMessageText}`;
 
       const response = await fetch('https://buis-bot.onrender.com/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_id: currentUserId,
-          prompt: fullPrompt, // Send the combined prompt
+          prompt: fullPrompt,
         }),
       })
 
@@ -163,24 +152,19 @@ const chatbot = () => {
       }
 
       const data = await response.json()
-      // Simulate typing delay for bot response
-      await new Promise(resolve => setTimeout(resolve, 300)); // Shorter delay
-      const botResponseText = data.answer || 'Sorry, I could not process that.'; // Store bot response text
+      await new Promise(resolve => setTimeout(resolve, 300));
+      const botResponseText = data.answer || 'Sorry, I could not process that.';
       const botMessage = { sender: 'bot', text: botResponseText }
       setMessages((prev) => [...prev, botMessage])
 
-      // Save bot message
       await saveMessageToDb('bot', botResponseText);
 
-      await logUserInteraction(currentUserId, userMessageText, botResponseText) // Use stored texts
+      await logUserInteraction(currentUserId, userMessageText, botResponseText)
 
     } catch (error) {
-      console.error('Error sending message:', error)
-      const errorMessageText = `Error: ${error.message}. Please try again.`; // Store error text
+      const errorMessageText = `Error: ${error.message}. Please try again.`;
       const errorMessage = { sender: 'bot', text: errorMessageText }
       setMessages((prev) => [...prev, errorMessage])
-      // Optionally save error message to history as well
-      // await saveMessageToDb('bot', errorMessageText);
     } finally {
       setIsLoading(false)
     }

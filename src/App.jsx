@@ -137,7 +137,13 @@ function App() {
           path="/business-form"
           element={
             user ? (
-              userBusinessInfo ? <Navigate to="/welcome" /> : <BusinessForm />
+              userBusinessInfo ? (
+                <Navigate to="/welcome" />
+              ) : (
+                <BusinessForm
+                  onBusinessInfoCompleted={info => setUserBusinessInfo(info)}
+                />
+              )
             ) : (
               <Navigate to="/login" replace />
             )
