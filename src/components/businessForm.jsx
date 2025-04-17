@@ -7,7 +7,7 @@ const supabaseUrl = 'https://wvjuhrxgibiyukzxedrc.supabase.co'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind2anVocnhnaWJpeXVrenhlZHJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQxMjAxNDcsImV4cCI6MjA1OTY5NjE0N30.L6OKP_dVbvZvlvRQJc7APcu3MbP1aWBmzrMiCA7nxf0'
 const supabase = createClient(supabaseUrl, supabaseKey)
 
-const BusinessForm = () => {
+const BusinessForm = (props) => {
   const [formData, setFormData] = useState({
     business_name: '',
     business_type: '',
@@ -35,8 +35,7 @@ const BusinessForm = () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('No authenticated user found')
 
-      // Use upsert instead of insert to avoid duplicate key error
-      const { error } = await supabase.from('users').upsert({
+      const { data, error } = await supabase.from('users').upsert({
         id: user.id,
         email: user.email,
         business_name: formData.business_name,
@@ -46,11 +45,14 @@ const BusinessForm = () => {
         company_size: formData.company_size,
         goals: formData.goals,
         challenges: formData.challenges
-      })
+      }).select().single()
 
       if (error) throw error
 
       setMessage('Business information saved successfully!')
+      if (props.onBusinessInfoCompleted) {
+        props.onBusinessInfoCompleted(data)
+      }
       navigate('/welcome')
     } catch (error) {
       setMessage('Error saving business information: ' + error.message)
